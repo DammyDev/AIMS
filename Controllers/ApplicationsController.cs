@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using ProjectAPI.Data;
 using ProjectAPI.Pagination;
 using ProjectAPI.Repositories;
@@ -15,11 +16,13 @@ namespace ProjectAPI.Controllers
     {
         private readonly IApplicationRepository repository;
         private readonly IServerRepository serverRepository;
+        private readonly IConfiguration config;
 
-        public ApplicationsController(IApplicationRepository repository, IServerRepository _serverRepository)
+        public ApplicationsController(IConfiguration iConfig, IApplicationRepository repository, IServerRepository _serverRepository)
         {
             this.repository = repository;
             serverRepository = _serverRepository;
+            config = iConfig;
         }
 
         [HttpGet]
@@ -76,28 +79,22 @@ namespace ProjectAPI.Controllers
         [HttpGet("GetServers/{id}")]
         public IEnumerable<Server> GetApplications(int id)
         {
-            if (!repository.Get(id, out var application))
-            {
-                //return NotFound();
-            }
-
             var query = $"select b.* from Applications a, ServerInfo b, Application_ServerInfo c where a.Id = c.ApplicationId  and b.Id = c.ServerInformationId  and a.Id = '{id.ToString()}'";
-
             return ReadDatabase3(query);
         }
 
         // ADD a new serverInfo to application: api/application/1
         [HttpPost("AddNewServer/{id}")]
-            public async Task<IActionResult> AddNewServerAsync([FromRoute] int id, [FromBody] Server server)
+        public async Task<IActionResult> AddNewServerAsync([FromRoute] int id, [FromBody] Server server)
             {
                 if (repository.Get(id, out Application app))
                 {
                     await serverRepository.AddAsync(server);
 
-                    string query = $"INSERT INTO Application_ServerInfo (ApplicationId,ServerInformationId,DateCreated) " +
+                    string query = $"INSERT INTO Application_ServerInfo (ApplicationId,ServerInformationId,FolderPath,DateDeployed,DateCreated) " +
                         $"VALUES('{app.Id.ToString()}', '{server.Id.ToString()}', GETDATE())";
 
-                    SolutionsController.UpdateDatabase(query);
+                QueryDB(query);
                     return CreatedAtAction(nameof(GetById), new { id = server.Id }, server);
                 }
                 return NotFound();
@@ -111,19 +108,36 @@ namespace ProjectAPI.Controllers
             {
                 if (serverRepository.Get(ASModel.ServerInformationId, out Server server))
                 {
-                    string query = $"INSERT INTO Application_ServerInfo (ApplicationId,ServerInformationId,DateCreated) " +
-                        $"VALUES('{app.Id.ToString()}', '{server.Id.ToString()}', GETDATE())";
-                    SolutionsController.UpdateDatabase(query);
+                    string query = $"INSERT INTO Application_ServerInfo (ApplicationId,ServerInformationId,FolderPath,DateDeployed,DateCreated) " +
+                        $"VALUES('{app.Id.ToString()}', '{server.Id.ToString()}', '{ASModel.FolderPath}', '{ASModel.DateDeployed}', GETDATE())";
+                    QueryDB(query);
                     return CreatedAtAction(nameof(GetById), new { id = server.Id }, server);
                 }
             }
             return NotFound();
         }
 
+        // REMOVE an existing server in an application: api/application/removeserver
+        [HttpPost("RemoveServer/")]
+        public IActionResult RemoveServer(ApplicationServer ASModel)
+        {
+            if (repository.Get(ASModel.ApplicationId, out Application app))
+            {
+                if (serverRepository.Get(ASModel.ServerInformationId, out Server server))
+                {
+                    string query = $"DELETE FROM Application_ServerInfo WHERE ApplicationId={ASModel.ApplicationId} AND ServerInformationId={ASModel.ServerInformationId}";
+                    QueryDB(query);
+                    return Ok();
+                }
+                return NotFound();
+            }
+            return NotFound();
+        }
+
         private IEnumerable<Server> ReadDatabase3(string query)
         {
-            string connStr = "Server=172.27.4.135;Database=dbAppManager2;uid=batappuser;password=bat*987User$2;";
-            //string connStr = "Server=(localdb)\\MSSQLLocalDB;Database=dbAccounts;Trusted_Connection=True;MultipleActiveResultSets=true";
+            //string connStr = Cyber_Ark.GetConnectionString();
+            string connStr = config.GetConnectionString("DefaultConnection");
             using SqlConnection con = new SqlConnection(connStr);
             con.Open();
             using SqlCommand command = new SqlCommand(query, con);
@@ -138,11 +152,11 @@ namespace ProjectAPI.Controllers
                     Server newServer = new Server()
                     {
                         Id = reader.GetInt32(0),
-                        FullName = reader.GetString(1),
-                        IPAddress = reader.GetString(2),
-                        Type = reader.GetString(3),
+                        FullName = reader.GetString(3),
+                        IPAddress = reader.GetString(1),
+                        Type = reader.GetString(5),
                         OperatingSystem = reader.GetString(4),
-                        DateCreated = reader.GetDateTime(5)
+                        DateCreated = reader.GetDateTime(2)
                     };
                     output.Add(newServer);
                 }
@@ -153,6 +167,16 @@ namespace ProjectAPI.Controllers
             }
             reader.Close();
             return output;
+        }
+
+        private void QueryDB(string query)
+        {
+            // string connStr = Cyber_Ark.GetConnectionString();
+            string connStr = config.GetConnectionString("DefaultConnection");
+            using SqlConnection con = new SqlConnection(connStr);
+            con.Open();
+            using SqlCommand command = new SqlCommand(query, con);
+            using SqlDataReader reader = command.ExecuteReader();
         }
     }
 }

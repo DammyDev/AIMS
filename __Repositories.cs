@@ -19,7 +19,7 @@ namespace ProjectAPI.Repositories
         PagedList<Solution_> GetAll(PagingParameters parameters, HttpContext httpContext);
         Task<int> AddAsync(Solution solution);
         Solution Update(Solution changes);
-        Solution Delete(int Id);
+        void Delete(int Id);
     }
 
     public interface IApplicationRepository
@@ -28,7 +28,7 @@ namespace ProjectAPI.Repositories
         PagedList<Application> GetAll(PagingParameters parameters, HttpContext httpContext);
         Task<int> AddAsync(Application application);
         Application Update(Application changes);
-        Application Delete(int Id);
+        void Delete(int Id);
     }
 
     public interface IDatabaseRepository
@@ -37,7 +37,7 @@ namespace ProjectAPI.Repositories
         PagedList<Database> GetAll(PagingParameters parameters, HttpContext httpContext);
         Task<int> AddAsync(Database database);
         Database Update(Database changes);
-        Database Delete(int Id);
+        void Delete(int Id);
     }    
 
     public interface IServerRepository
@@ -46,7 +46,7 @@ namespace ProjectAPI.Repositories
         PagedList<Server> GetAll(PagingParameters parameters, HttpContext httpContext);
         Task<int> AddAsync(Server server);
         Server Update(Server server);
-        Server Delete(int Id);
+        void Delete(int Id);
     }
     #endregion
 
@@ -59,6 +59,7 @@ namespace ProjectAPI.Repositories
             this.context = context;
         }
 
+        
         public async Task<int> AddAsync(Solution solution)
         {
             context.Solution.Add(solution);
@@ -66,15 +67,16 @@ namespace ProjectAPI.Repositories
             return rowsAffected;
         }
 
-        public Solution Delete(int Id)
+        public void Delete(int Id)
         {
             Solution solution = context.Solution.Find(Id);
             if (solution != null)
             {
-                context.Solution.Remove(solution);
-                context.SaveChanges();
+                //context.Solution.Remove(solution);
+                //context.SaveChanges();
+                solution.Status = "Disabled";
             }
-            return solution;
+            Update(solution);
         }
 
         public bool Get(int id, out Solution solution)
@@ -85,8 +87,9 @@ namespace ProjectAPI.Repositories
 
         public PagedList<Solution_> GetAll([FromQuery]PagingParameters parameters, HttpContext httpContext)
         {
+
             // Return List of Solutions  
-            var source = (from solution in context.Solution.OrderBy(a => a.Id) select solution).AsQueryable();
+            var source = (from solution in context.Solution.OrderBy(a => a.Id) select solution).AsQueryable().Where(x => x.Status=="Enabled");
 
             return PagedList<Solution_>.ToPagedList(source, parameters.PageNumber, parameters.PageSize, httpContext);
         }
@@ -122,15 +125,16 @@ namespace ProjectAPI.Repositories
             return rowsAffected;
         }
 
-        public Application Delete(int Id)
+        public void Delete(int Id)
         {
             Application application = context.Applications.Find(Id);
             if (application != null)
             {
-                context.Applications.Remove(application);
-                context.SaveChanges();
+                //context.Applications.Remove(application);
+                //context.SaveChanges();
+                application.Status = "Disabled";
             }
-            return application;
+            Update(application);
         }
 
         public bool Get(int id, out Application application)
@@ -141,7 +145,7 @@ namespace ProjectAPI.Repositories
 
         public PagedList<Application> GetAll([FromQuery]PagingParameters parameters, HttpContext httpContext)
         {
-            var source = (from solution in context.Applications.OrderBy(a => a.Id) select solution).AsQueryable();
+            var source = (from solution in context.Applications.OrderBy(a => a.Id) select solution).AsQueryable().Where(x => x.Status == "Enabled");
 
             return PagedList<Application>.ToPagedList(source, parameters.PageNumber, parameters.PageSize, httpContext);
         }
@@ -169,15 +173,16 @@ namespace ProjectAPI.Repositories
             return rowsAffected;
         }
 
-        public Database Delete(int Id)
+        public void Delete(int Id)
         {
             Database database = context.Databases.Find(Id);
             if (database != null)
             {
-                context.Databases.Remove(database);
-                context.SaveChanges();
+                // context.Databases.Remove(database);
+                //context.SaveChanges();
+                database.Status = "Disabled";
             }
-            return database;
+            Update(database);
         }
 
         public bool Get(int id, out Database database)
@@ -188,7 +193,7 @@ namespace ProjectAPI.Repositories
 
         public PagedList<Database> GetAll([FromQuery]PagingParameters parameters, HttpContext httpContext)
         {
-            var source = (from solution in context.Databases.OrderBy(a => a.Id) select solution).AsQueryable();
+            var source = (from solution in context.Databases.OrderBy(a => a.Id) select solution).AsQueryable().Where(x => x.Status == "Enabled");
 
             return PagedList<Database>.ToPagedList(source, parameters.PageNumber, parameters.PageSize, httpContext);
         }
@@ -224,15 +229,16 @@ namespace ProjectAPI.Repositories
             return rowsAffected;
         }
 
-        public Server Delete(int Id)
+        public void Delete(int Id)
         {
             Server server = context.ServerInfo.Find(Id);
             if (server != null)
             {
-                context.ServerInfo.Remove(server);
-                context.SaveChanges();
+                //context.ServerInfo.Remove(server);
+                //context.SaveChanges();
+                server.Status = "Disabled";
             }
-            return server;
+            Update(server);
         }
 
         public bool Get(int id, out Server server)
@@ -243,7 +249,7 @@ namespace ProjectAPI.Repositories
 
         public PagedList<Server> GetAll([FromQuery]PagingParameters parameters, HttpContext httpContext)
         {
-            var source = (from solution in context.ServerInfo.OrderBy(a => a.Id) select solution).AsQueryable();
+            var source = (from solution in context.ServerInfo.OrderBy(a => a.Id) select solution).AsQueryable().Where(x => x.Status == "Enabled");
 
             return PagedList<Server>.ToPagedList(source, parameters.PageNumber, parameters.PageSize, httpContext);
         }

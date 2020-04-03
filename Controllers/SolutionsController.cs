@@ -1,21 +1,19 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ProjectAPI.Data;
-using ProjectAPI.Enums;
 using ProjectAPI.Repositories;
-using System.Configuration;
 using System;
 using ProjectAPI.Pagination;
 using System.IO;
+using Serilog;
 
 namespace ProjectAPI.Controllers
 {
-    
+   
     [Route("api/[controller]")]
     [ApiController]
     public class SolutionsController : ControllerBase
@@ -33,10 +31,11 @@ namespace ProjectAPI.Controllers
             config = iConfig;
         }
 
-        // GETALL: api/solutions/5
+        // GETALL: api/solutions
         [HttpGet]
         public IEnumerable<Solution_> Get([FromQuery] PagingParameters parameters)
         {
+            Log.Information("Connecting to SQL Server ...");
             return solutionRepository.GetAll(parameters, HttpContext);
         }
 
@@ -118,6 +117,7 @@ namespace ProjectAPI.Controllers
 
             return ReadDatabase2(query);
         }
+
         // ADD a new application to solution: api/solution/1
         [HttpPost("AddNewApp/{id}")]
         public async Task<IActionResult> AddNewApplicationAsync([FromRoute] int id, [FromBody]Application app,  bool isAppInternal)
@@ -129,14 +129,14 @@ namespace ProjectAPI.Controllers
                 string query = $"INSERT INTO Solution_Application (SolutionId,ApplicationId,DateCreated,IsInternal) " +
                     $"VALUES('{solution.Id.ToString()}', '{app.Id.ToString()}', GETDATE(), '{isAppInternal}')";
 
-                UpdateDatabase(query);
+                QueryDatabase(query);
                 //return CreatedAtAction(nameof(GetById), new { id = solution.Id }, solution);
                 return CreatedAtAction(nameof(GetById), new { id = app.Id }, app);
             }
             return NotFound();
         }
 
-        // ADD an existing application to solution: api/solution/1
+        // ADD an existing application to solution: api/solution
         [HttpPost("AddExistingApp/")]
         public IActionResult AddExistingApplication(SolutionApplication SAModel)
         {
@@ -146,9 +146,43 @@ namespace ProjectAPI.Controllers
                 {
                     string query = $"INSERT INTO Solution_Application (SolutionId,ApplicationId,DateCreated,IsInternal) " +
                         $"VALUES('{solution.Id.ToString()}', '{app.Id.ToString()}', GETDATE(), '{SAModel.IsInternal}')";
-                    UpdateDatabase(query);
+                    QueryDatabase(query);
                     return CreatedAtAction(nameof(GetById), new { id = app.Id }, app);
                 }
+            }
+            return NotFound();
+        }
+
+        // REMOVE an  application in a  solution: api/solutions/removeapp
+        [HttpPost("RemoveApp/")]
+        public IActionResult RemoveApp(SolutionApplication SAModel)
+        {
+            if (solutionRepository.Get(SAModel.SolutionId, out Solution solution))
+            {
+                if (applicationRepository.Get(SAModel.ApplicationId, out Application app))
+                {
+                    string query = $"DELETE FROM Solution_Application WHERE SolutionId={SAModel.SolutionId} AND ApplicationId={SAModel.ApplicationId}";
+                    QueryDatabase(query);
+                    return Ok();
+                }
+                return NotFound();
+            }
+            return NotFound();
+        }
+
+        // REMOVE a database in a  solution: api/solutions/removedb
+        [HttpPost("RemoveDb/")]
+        public IActionResult RemoveDb(SolutionDatabase SDModel)
+        {
+            if (solutionRepository.Get(SDModel.SolutionId, out Solution solution))
+            {
+                if (databaseRepository.Get(SDModel.DatabaseId, out Database database))
+                {
+                    string query = $"DELETE FROM Solution_Database WHERE SolutionId={SDModel.SolutionId} AND DatabaseId={SDModel.DatabaseId}";
+                    QueryDatabase(query);
+                    return Ok();
+                }
+                return NotFound();
             }
             return NotFound();
         }
@@ -162,7 +196,7 @@ namespace ProjectAPI.Controllers
                 await databaseRepository.AddAsync(database);
                 string query = $"INSERT INTO Solution_Database (SolutionId,DatabaseId,DateCreated) " +
                     $"VALUES('{solution.Id.ToString()}', '{database.Id.ToString()}', GETDATE())";
-                UpdateDatabase(query);
+                QueryDatabase(query);
                 return CreatedAtAction(nameof(GetById), new { id = database.Id }, database);
             }
             return NotFound();
@@ -178,7 +212,7 @@ namespace ProjectAPI.Controllers
                 {
                     string query = $"INSERT INTO Solution_Database (SolutionId,DatabaseId,DateCreated) " +
                         $"VALUES('{solution.Id.ToString()}', '{database.Id.ToString()}', GETDATE())";
-                    UpdateDatabase(query);
+                    QueryDatabase(query);
                     return CreatedAtAction(nameof(GetById), new { id = database.Id }, database);
                 }
             }
@@ -187,10 +221,10 @@ namespace ProjectAPI.Controllers
         #endregion
 
         #region Helper Methods
-        public static void UpdateDatabase(string query)
+        private void QueryDatabase(string query)
         {
-            string connStr = "Server=172.27.4.135;Database=dbAppManager2;uid=batappuser;password=bat*987User$2;";
-            //string connStr = "Server=(localdb)\\MSSQLLocalDB;Database=dbAccounts;Trusted_Connection=True;MultipleActiveResultSets=true";
+            //string connStr = Cyber_Ark.GetConnectionString();
+            string connStr = config.GetConnectionString("DefaultConnection");
             using SqlConnection con = new SqlConnection(connStr);
             con.Open();
             using SqlCommand command = new SqlCommand(query, con);
@@ -199,8 +233,8 @@ namespace ProjectAPI.Controllers
 
         private IEnumerable<Application> ReadDatabase1(string query)
         {
-            string connStr = "Server=172.27.4.135;Database=dbAppManager2;uid=batappuser;password=bat*987User$2;";
-            //string connStr = "Server=(localdb)\\MSSQLLocalDB;Database=dbAccounts;Trusted_Connection=True;MultipleActiveResultSets=true";
+            //string connStr = Cyber_Ark.GetConnectionString();
+            string connStr = config.GetConnectionString("DefaultConnection");
             using SqlConnection con = new SqlConnection(connStr);
             con.Open();
             using SqlCommand command = new SqlCommand(query, con);
@@ -219,7 +253,7 @@ namespace ProjectAPI.Controllers
                         Description = reader.GetString(2),
                         Type = reader.GetString(3),
                         Language = reader.GetString(4),
-                        FullPath = reader.GetString(5),
+                        //FullPath = reader.GetString(5),
                         DateCreated = reader.GetDateTime(6)
                     };
                     output.Add(newApp);
@@ -234,8 +268,9 @@ namespace ProjectAPI.Controllers
         }
         private IEnumerable<Database> ReadDatabase2(string query)
         {
-            string connStr = "Server=172.27.4.135;Database=dbAppManager2;uid=batappuser;password=bat*987User$2;";
-            //string connStr = "Server=(localdb)\\MSSQLLocalDB;Database=dbAccounts;Trusted_Connection=True;MultipleActiveResultSets=true";
+            //string connStr = Cyber_Ark.GetConnectionString();
+            string connStr = config.GetConnectionString("DefaultConnection");
+            
             using SqlConnection con = new SqlConnection(connStr);
             con.Open();
             using SqlCommand command = new SqlCommand(query, con);
@@ -253,9 +288,9 @@ namespace ProjectAPI.Controllers
                         Name = reader.GetString(1),
                         Engine = reader.GetString(2),
                         ServerName = reader.GetString(3),
-                        UserName = reader.GetString(4),
+                        UserName = reader.GetString(6),
                         Password = reader.GetString(5),
-                        DateCreated = reader.GetDateTime(6)
+                        DateCreated = reader.GetDateTime(4)
                     };
                     output.Add(newDb);
                 }

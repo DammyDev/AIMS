@@ -5,8 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProjectAPI.Data;
-using ProjectAPI.Repositories;
+using ProjectAPI.Repositories.SQL;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using ProjectAPI.Repositories;
 
 namespace ProjectAPI
 {
@@ -38,14 +40,15 @@ namespace ProjectAPI
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "AppManager", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AppManager", Version = "v1" });
             });
             services.AddScoped<ISolutionRepository, SQLSolutionRepository>();
             services.AddScoped<IApplicationRepository, SQLApplicationRepository>();
             services.AddScoped<IDatabaseRepository, SQLDatabaseRepository>();
-            services.AddScoped<IServerRepository, SQLServerInfoRepository>();
+            services.AddScoped<IServerRepository, SQLServerRepository>();
             services.AddDbContext<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")
+                //options => options.UseSqlServer(Cyber_Ark.GetConnectionString()
                 ));
         }
 
@@ -63,12 +66,20 @@ namespace ProjectAPI
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "AppManager API V1");
-                //c.RoutePrefix = string.Empty;
+            #if DEBUG
+                // For Debug in Kestrel
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppManager API V1");
+            #else
+                // To deploy on IIS
+                c.SwaggerEndpoint("/AppManager/swagger/v1/swagger.json", "AppManager API V1");
+            #endif
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();
-            
+
+            app.UseSerilogRequestLogging(); //serilog
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -78,5 +89,7 @@ namespace ProjectAPI
                 endpoints.MapControllers();
             });
         }
+
+
     }
 }

@@ -10,6 +10,7 @@ namespace ProjectAPI.Data
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string Status { get; set; } = "Enabled";
     }
     public class Solution: Solution_
     {
@@ -27,6 +28,7 @@ namespace ProjectAPI.Data
         public string FullPath { get; set; }
         public DateTime DateDeployed { get; set; } 
         public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string Status { get; set; } = "Enabled";
     }
 
     public class Database
@@ -38,6 +40,7 @@ namespace ProjectAPI.Data
         public string UserName { get; set; }
         public string Password { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string Status { get; set; } = "Enabled";
     }
 
     public class Server
@@ -47,7 +50,8 @@ namespace ProjectAPI.Data
         public string IPAddress { get; set; }
         public string Type { get; set; }
         public string OperatingSystem { get; set; }
-        public DateTime DateCreated { get; set; } = DateTime.Now;    
+        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string Status { get; set; } = "Enabled";
     }
 
     #region JoiningTables
@@ -58,12 +62,14 @@ namespace ProjectAPI.Data
             public bool IsInternal { get; set; } = true;
             public DateTime DateCreated { get; set; } = DateTime.Now;
         }
+
         public class SolutionDatabase
         {
             public int SolutionId { get; set; }
             public int DatabaseId { get; set; }
             public DateTime DateCreated { get; set; } = DateTime.Now;
         }
+
         public class ApplicationServer
         {
             public int ApplicationId { get; set; }
