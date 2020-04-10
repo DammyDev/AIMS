@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 
-namespace ProjectAPI
+namespace AIMS
 {
     public class Program
     {

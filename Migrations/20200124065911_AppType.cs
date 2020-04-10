@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ProjectAPI.Migrations
+namespace AIMS.Migrations
 {
     public partial class AppType : Migration
     {

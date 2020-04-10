@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ProjectAPI.Data
+namespace AIMS.Data
 {
     public class Application
     {

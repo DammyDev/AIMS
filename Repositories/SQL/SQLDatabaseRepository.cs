@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ProjectAPI.Data;
-using ProjectAPI.Pagination;
+using AIMS.Data;
+using AIMS.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Repositories.SQL
+namespace AIMS.Repositories.SQL
 {
     public class SQLDatabaseRepository : IDatabaseRepository
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using ProjectAPI.Data;
-using ProjectAPI.Pagination;
+using AIMS.Data;
+using AIMS.Pagination;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Repositories
+namespace AIMS.Repositories
 {
     public interface IServerRepository
     {

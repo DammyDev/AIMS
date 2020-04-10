@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ProjectAPI.Data;
-using ProjectAPI.Repositories;
+using AIMS.Data;
+using AIMS.Repositories;
 using System;
-using ProjectAPI.Pagination;
+using AIMS.Pagination;
 using System.IO;
 using Serilog;
 
-namespace ProjectAPI.Controllers
+namespace AIMS.Controllers
 {
    
     [Route("api/[controller]")]

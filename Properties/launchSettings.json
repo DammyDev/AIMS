@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ProjectAPI": {
+    "AIMS": {
       "commandName": "Project",
       "launchBrowser": false,
       "launchUrl": "weatherforecast",

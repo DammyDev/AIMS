@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Pagination
+namespace AIMS.Pagination
 {
     public class PagingParameters
     {

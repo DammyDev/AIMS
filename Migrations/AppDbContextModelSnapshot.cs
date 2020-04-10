@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProjectAPI.Data;
+using AIMS.Data;
 
-namespace ProjectAPI.Migrations
+namespace AIMS.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -19,7 +19,7 @@ namespace ProjectAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("ProjectAPI.Data.Application", b =>
+            modelBuilder.Entity("AIMS.Data.Application", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +49,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Applications");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.ApplicationServer", b =>
+            modelBuilder.Entity("AIMS.Data.ApplicationServer", b =>
                 {
                     b.Property<int>("ApplicationId")
                         .HasColumnType("int");
@@ -71,7 +71,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Application_ServerInfo");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.Database", b =>
+            modelBuilder.Entity("AIMS.Data.Database", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -104,7 +104,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Databases");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.Server", b =>
+            modelBuilder.Entity("AIMS.Data.Server", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -134,7 +134,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("ServerInfo");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.Solution", b =>
+            modelBuilder.Entity("AIMS.Data.Solution", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -161,7 +161,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Solution");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.SolutionApplication", b =>
+            modelBuilder.Entity("AIMS.Data.SolutionApplication", b =>
                 {
                     b.Property<int>("SolutionId")
                         .HasColumnType("int");
@@ -180,7 +180,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Solution_Application");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Data.SolutionDatabase", b =>
+            modelBuilder.Entity("AIMS.Data.SolutionDatabase", b =>
                 {
                     b.Property<int>("SolutionId")
                         .HasColumnType("int");

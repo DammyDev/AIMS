@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ProjectAPI.Data
+namespace AIMS.Data
 {
     public class AppDbContext : DbContext
     {

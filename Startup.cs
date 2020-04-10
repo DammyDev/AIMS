@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProjectAPI.Data;
-using ProjectAPI.Repositories.SQL;
+using AIMS.Data;
+using AIMS.Repositories.SQL;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using ProjectAPI.Repositories;
+using AIMS.Repositories;
 
-namespace ProjectAPI
+namespace AIMS
 {
     public class Startup
     {

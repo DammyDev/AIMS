@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace ProjectAPI
+namespace AIMS
 {
     public class Base64FileJsonConverter : JsonConverter
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Data
+namespace AIMS.Data
 {
     public class Solution_
     {

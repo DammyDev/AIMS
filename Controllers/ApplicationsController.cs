@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using ProjectAPI.Data;
-using ProjectAPI.Pagination;
-using ProjectAPI.Repositories;
+using AIMS.Data;
+using AIMS.Pagination;
+using AIMS.Repositories;
 
-namespace ProjectAPI.Controllers
+namespace AIMS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
